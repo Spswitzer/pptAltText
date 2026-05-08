@@ -1,0 +1,112 @@
+---
+title: |
+  Jeffco Listens: Family Survey  
+  2025-2026
+output:
+  powerpoint_presentation:
+    reference_doc: JeffcoTemplate3.pptx
+knit: |
+  (function(input, encoding, ...) {
+    rmarkdown::render(
+      input,
+      encoding = encoding,
+      output_format = rmarkdown::powerpoint_presentation(
+        reference_doc = "JeffcoTemplate3.pptx"
+      )
+    )
+
+    # ---- Post-process: inject alt text into pptx ----
+    alt_store_file <- "_alt_texts.rds"
+    if (file.exists(alt_store_file)) {
+      message("Injecting alt text into pptx...")
+      alt_list   <- readRDS(alt_store_file)
+      alt_values <- unname(unlist(alt_list))
+      output_file <- sub("\\.Rmd$", ".pptx", input)
+      prs <- officer::read_pptx(output_file)
+      n_slides <- length(prs)
+
+      img_index <- 1L
+      for (i in seq_len(n_slides)) {
+        raw_xml <- prs$slide$get_slide(i)$get()
+        pics    <- xml2::xml_find_all(raw_xml, ".//*[local-name()='pic']")
+        for (pic in pics) {
+          if (img_index > length(alt_values)) break
+          cNvPr <- xml2::xml_find_first(pic, ".//*[local-name()='cNvPr']")
+          if (!is.na(cNvPr)) {
+            xml2::xml_set_attr(cNvPr, "descr", alt_values[[img_index]])
+            message("  Slide ", i, ": set alt text -> '", alt_values[[img_index]], "'")
+            img_index <- img_index + 1L
+          }
+        }
+      }
+
+      print(prs, target = output_file)
+      file.remove(alt_store_file)
+      message("Done. Alt text patched into: ", output_file)
+    }
+  })
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+
+# Global store: chunk_label -> alt_text string
+.alt_text_store <- list()
+
+# Chunk hook: after each chunk, grab labs(alt=) from any ggplot
+knit_hooks$set(capture_alt = function(before, options, envir) {
+  if (!before) {
+    p <- tryCatch(get(options$label, envir = envir), error = function(e) NULL)
+    if (inherits(p, "ggplot") && !is.null(p$labels$alt)) {
+      .alt_text_store[[options$label]] <<- p$labels$alt
+      saveRDS(.alt_text_store, "_alt_texts.rds")
+    }
+  }
+})
+
+opts_chunk$set(echo = FALSE, capture_alt = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+## Slide with Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+
+## Slide with MPG
+
+```{r mpg, warning=FALSE, message=FALSE}
+library(tidyverse)
+
+mpg <-
+  ggplot(mtcars, aes(mpg)) +
+  geom_histogram(bins = 10) +
+  geom_vline(aes(xintercept = mean(mpg)), 
+             color = "red", linetype = "dashed", linewidth = 1)  +
+  labs(alt = paste0("Graphic of distribution and mean of\n Miles Per Gallon (MGP).\n Mean: ", round(mean(mtcars$mpg))))
+
+mpg
+```
+
+## Slide with Car weights
+
+```{r weight, warning=FALSE, message=FALSE}
+library(tidyverse)
+
+weight <-
+  ggplot(mtcars, aes(wt)) +
+  geom_histogram(bins = 10) +
+  geom_vline(aes(xintercept = mean(wt)), 
+             color = "red", linetype = "dashed", linewidth = 1)  +
+  labs(alt = paste0("Graphic of distribution and mean of\n car weights.\n Mean Weight: ", round(mean(mtcars$wt))))
+
+weight
+
+```
