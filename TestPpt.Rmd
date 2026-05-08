@@ -82,7 +82,12 @@ When you click the **Knit** button a document will be generated that includes bo
 
 ## Slide with MPG
 
-```{r mpg, warning=FALSE, message=FALSE}
+```{r, echo=FALSE}
+my_caption = paste0("Graphic of distribution and mean of\n Miles Per Gallon (MGP).\n Mean: ", round(mean(mtcars$mpg)))
+```
+
+
+```{r mpg, warning=FALSE, message=FALSE, fig.cap=my_caption}
 library(tidyverse)
 
 mpg <-
@@ -90,7 +95,8 @@ mpg <-
   geom_histogram(bins = 10) +
   geom_vline(aes(xintercept = mean(mpg)), 
              color = "red", linetype = "dashed", linewidth = 1)  +
-  labs(alt = paste0("Graphic of distribution and mean of\n Miles Per Gallon (MGP).\n Mean: ", round(mean(mtcars$mpg))))
+  labs(alt = paste0("Graphic of distribution and mean of\n Miles Per Gallon (MGP).\n Mean: ", round(mean(mtcars$mpg))), 
+       caption = my_caption)
 
 mpg
 ```
