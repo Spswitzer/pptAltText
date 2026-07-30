@@ -6,7 +6,7 @@ Enhance Accessibility of Markdown Files such as PowerPoint
 
 ## Resources
 In PowerPoint slides stored in Windows
-* Add Speak tool to tool bar
+* Add Speak tool to the Custom Quick Access Toolbar
 * Review > Check Accessibility
 * For ideas for adding alt text to figures, select figure, go to Alt Text, generate alt text for me
 
