@@ -1,5 +1,5 @@
 # Enhance accessibility of Markdown files
-## Purpose: 
+## Purpose
 Enhance Accessibility of Markdown Files such as PowerPoint
 * Alt Text to Figures
 * Add captions to figures
